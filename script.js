@@ -4,47 +4,50 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// Kalp Geometrisi
 function createHeartGeometry() {
     const shape = new THREE.Shape();
-    shape.moveTo(0, 0.5);
-    shape.bezierCurveTo(0, 0.5, -0.5, 1, -1, 0.5);
-    shape.bezierCurveTo(-1, 0, 0, -1, 0, -1);
-    shape.bezierCurveTo(0, -1, 1, 0, 1, 0.5);
-    shape.bezierCurveTo(1, 1, 0, 0.5, 0, 0.5);
-    return new THREE.ExtrudeGeometry(shape, { depth: 0.1, bevelEnabled: true });
+    shape.moveTo(0, 0.3);
+    shape.bezierCurveTo(0, 0.3, -0.3, 0.6, -0.6, 0.3);
+    shape.bezierCurveTo(-0.6, 0, 0, -0.6, 0, -0.6);
+    shape.bezierCurveTo(0, -0.6, 0.6, 0, 0.6, 0.3);
+    shape.bezierCurveTo(0.6, 0.6, 0, 0.3, 0, 0.3);
+    return new THREE.ExtrudeGeometry(shape, { depth: 0.05, bevelEnabled: false });
 }
 
 const heartGeo = createHeartGeometry();
 const heartMat = new THREE.MeshBasicMaterial({ color: 0xff007f });
 const heartGroup = new THREE.Group();
 
-const count = 800;
+// Galaksi Spiral Yapısı
+const count = 1200;
 for (let i = 0; i < count; i++) {
     const heartMesh = new THREE.Mesh(heartGeo, heartMat);
-    heartMesh.userData = {
-        radius: 4 + Math.random() * 14,
-        angle: Math.random() * Math.PI * 2,
-        ySpeed: 0.000 + Math.random() * 0.012,
-        yOffset: (Math.random() - 0.5) * 6
-    };
+    
+    // Yarıçap ve spiral açıları
+    const radius = 2 + Math.random() * 20;
+    const angle = (i / count) * Math.PI * 8 + (Math.random() - 0.5) * 0.5;
+    
+    heartMesh.position.x = Math.cos(angle) * radius;
+    heartMesh.position.z = Math.sin(angle) * radius;
+    heartMesh.position.y = (Math.random() - 0.5) * 2;
 
-    heartMesh.position.x = Math.cos(heartMesh.userData.angle) * heartMesh.userData.radius;
-    heartMesh.position.z = Math.sin(heartMesh.userData.angle) * heartMesh.userData.radius;
-    heartMesh.position.y = heartMesh.userData.yOffset;
-    heartMesh.scale.set(0.15, 0.15, 0.15);
+    // Kalpleri küçültüyoruz ki ekranı kaplamasınlar
+    heartMesh.scale.set(0.08, 0.08, 0.08);
+    heartMesh.rotation.x = Math.PI / 2;
 
-    scene.add(heartMesh);
     heartGroup.add(heartMesh);
 }
 
 scene.add(heartGroup);
-camera.position.z = 18;
-camera.position.y = 5;
+
+// Kamerayı geriye ve yukarıya çekerek açıyı düzeltiyoruz
+camera.position.set(0, 25, 25);
 camera.lookAt(0, 0, 0);
 
 function animate() {
     requestAnimationFrame(animate);
-    heartGroup.rotation.y += 0.003;
+    heartGroup.rotation.y += 0.002;
     renderer.render(scene, camera);
 }
 animate();
